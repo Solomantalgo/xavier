@@ -170,13 +170,15 @@ select.meta-input {
   display: none;
 }
 .photo-box input[type=file] {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; left: 0;
   opacity: 0;
   cursor: pointer;
   width: 100%; height: 100%;
+  z-index: 10;
 }
-.photo-box.loaded .photo-label { display: none; }
-.photo-box.loaded img { display: block; }
+.photo-box.loaded { border-color: transparent !important; }
+.photo-box.loaded .photo-label { display: none !important; }
+.photo-box.loaded img { display: block !important; }
 .photo-overlay {
   position: absolute; bottom: 0; left: 0; right: 0;
   background: rgba(26,92,69,.88);
@@ -188,16 +190,23 @@ select.meta-input {
 
 /* ── Signature Box ── */
 .sig-box {
-  height: 36px; border: 1.5px dashed #000;
+  height: 50px; border: 1.5px dashed #000;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 600; color: #555; cursor: pointer;
   position: relative; overflow: hidden; background: #f9f9f9; border-radius: 2px;
   flex: 1; min-width: 100px; margin-left: 6px;
 }
-.sig-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: none; }
-.sig-box input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.sig-box.loaded span { display: none; }
-.sig-box.loaded img { display: block; }
+.sig-box img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 5; }
+.sig-box input[type=file] { position: absolute; top: 0; left: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 10; }
+.sig-box.loaded { border-style: solid; background: #fff !important; }
+.sig-box.loaded span { display: none !important; }
+.sig-box.loaded img { display: block !important; }
+.sig-box.loaded input[type=file] { opacity: .01; }
+.sig-box.document-upload {
+  height: 112px;
+  min-width: 170px;
+  margin-left: 0;
+}
 
 /* ── Field rows ── */
 .f-row {
@@ -534,7 +543,7 @@ select.f-in {
       <div class="f-row" style="margin-bottom:0;">
         <div class="f-field" style="flex:1">
           <span class="f-lbl">LC1 Chairman's Recommendation Letter Photo</span>
-          <div class="sig-box" title="Click to upload LC1 Letter" style="height:50px; border: 1.5px dashed var(--green); max-width:300px; margin-left:0;">
+          <div class="sig-box document-upload" title="Click to upload LC1 Letter" style="border-color: var(--green); max-width:300px;">
             <img id="lc1Img" alt="photo"/><span>Click to Upload LC1 Letter</span><input type="file" id="lc1File" accept="image/*" onchange="loadPhoto(this)"/>
           </div>
         </div>
@@ -615,11 +624,22 @@ select.f-in {
               <div class="f-field"><span class="f-lbl">Contacts</span><input class="f-in" type="tel" id="nu1c"/></div>
               <div class="f-field"><span class="f-lbl">NIN</span><input class="f-in mono" type="text" id="nu1nin"/></div>
             </div>
-            <div class="f-row" style="margin-bottom:0;">
+            <div class="f-row">
               <div class="f-field"><span class="f-lbl">Source of Income</span><input class="f-in" type="text" id="nu1src"/></div>
               <div class="f-field"><span class="f-lbl">Location</span><input class="f-in" type="text" id="nu1loc"/></div>
-              <div class="f-field"><span class="f-lbl">Guarantor ID</span><input class="f-in mono" type="text" id="nu1id"/></div>
-              <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
+            </div>
+            <div class="f-row" style="margin-bottom:0;">
+              <div class="f-field" style="flex:1"><span class="f-lbl">Guarantor ID</span>
+                <div class="sig-box document-upload" title="Click to upload ID">
+                  <img alt="photo"/><span>Upload ID</span><input type="file" id="nu1id" accept="image/*" onchange="loadPhoto(this)"/>
+                </div>
+              </div>
+              <div class="f-field" style="flex:1"><span class="f-lbl">LC1 Letter</span>
+                <div class="sig-box document-upload" title="Click to upload LC1">
+                  <img alt="photo"/><span>Upload LC1</span><input type="file" accept="image/*" onchange="loadPhoto(this)"/>
+                </div>
+              </div>
+              <div class="f-field" style="flex:1"><span class="f-lbl">Signature</span>
                 <div class="sig-box" title="Click to upload signature">
                   <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
                 </div>
@@ -635,11 +655,22 @@ select.f-in {
               <div class="f-field"><span class="f-lbl">Contacts</span><input class="f-in" type="tel" id="nu2c"/></div>
               <div class="f-field"><span class="f-lbl">NIN</span><input class="f-in mono" type="text" id="nu2nin"/></div>
             </div>
-            <div class="f-row" style="margin-bottom:0;">
+            <div class="f-row">
               <div class="f-field"><span class="f-lbl">Source of Income</span><input class="f-in" type="text" id="nu2src"/></div>
               <div class="f-field"><span class="f-lbl">Location</span><input class="f-in" type="text" id="nu2loc"/></div>
-              <div class="f-field"><span class="f-lbl">Guarantor ID</span><input class="f-in mono" type="text" id="nu2id"/></div>
-              <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
+            </div>
+            <div class="f-row" style="margin-bottom:0;">
+              <div class="f-field" style="flex:1"><span class="f-lbl">Guarantor ID</span>
+                <div class="sig-box document-upload" title="Click to upload ID">
+                  <img alt="photo"/><span>Upload ID</span><input type="file" id="nu2id" accept="image/*" onchange="loadPhoto(this)"/>
+                </div>
+              </div>
+              <div class="f-field" style="flex:1"><span class="f-lbl">LC1 Letter</span>
+                <div class="sig-box document-upload" title="Click to upload LC1">
+                  <img alt="photo"/><span>Upload LC1</span><input type="file" accept="image/*" onchange="loadPhoto(this)"/>
+                </div>
+              </div>
+              <div class="f-field" style="flex:1"><span class="f-lbl">Signature</span>
                 <div class="sig-box" title="Click to upload signature">
                   <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
                 </div>
@@ -698,14 +729,7 @@ select.f-in {
       <div class="agent-title">EV CHAMPION / AGENT DETAILS (WHERE APPLICABLE)</div>
       <div class="f-row" style="margin-bottom:0;">
         <div class="f-field" style="flex:1.6"><span class="f-lbl">Name</span><input class="f-in" type="text" id="agName"/></div>
-        <div class="f-field"><span class="f-lbl">Agent/Champion ID</span><input class="f-in" type="text" id="agId"/></div>
-        <div class="f-field"><span class="f-lbl">Division/Region</span><input class="f-in" type="text" id="agDiv"/></div>
         <div class="f-field"><span class="f-lbl">Contact</span><input class="f-in" type="tel" id="agCont"/></div>
-        <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
-          <div class="sig-box" title="Click to upload signature">
-            <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -744,28 +768,64 @@ const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzNPxxB-
   document.getElementById('appDate').value=y+'-'+m+'-'+dd;
 })();
 
+/* Local Storage for Drafts */
+function saveLocal() {
+  var inputs = document.querySelectorAll('input:not([type=file]):not([type=button]):not([type=submit]), select');
+  var data = {};
+  inputs.forEach(function(el) {
+    if (el.type === 'radio' || el.type === 'checkbox') {
+      data[el.name + '_' + el.value] = el.checked;
+    } else if (el.id) {
+      data[el.id] = el.value;
+    }
+  });
+  localStorage.setItem('bikeFormDraft_' + document.title, JSON.stringify(data));
+}
+
+function loadLocal() {
+  var draft = localStorage.getItem('bikeFormDraft_' + document.title);
+  if (!draft) return;
+  try {
+    var data = JSON.parse(draft);
+    var inputs = document.querySelectorAll('input:not([type=file]):not([type=button]):not([type=submit]), select');
+    inputs.forEach(function(el) {
+      if (el.type === 'radio' || el.type === 'checkbox') {
+        var key = el.name + '_' + el.value;
+        if (data[key] !== undefined) el.checked = data[key];
+      } else if (el.id && data[el.id] !== undefined) {
+        el.value = data[el.id];
+      }
+    });
+  } catch(e){}
+}
+
+document.addEventListener('input', saveLocal);
+document.addEventListener('change', saveLocal);
+document.addEventListener('DOMContentLoaded', loadLocal);
+
+function previewUpload(inp){
+  if(!inp.files||!inp.files[0]) return;
+  var box = inp.closest('.photo-box, .sig-box');
+  if(!box) return;
+  var img = box.querySelector('img');
+  if(!img) return;
+  var previousUrl = img.getAttribute('data-preview-url');
+  if(previousUrl) URL.revokeObjectURL(previousUrl);
+  var previewUrl = URL.createObjectURL(inp.files[0]);
+  img.src = previewUrl;
+  img.setAttribute('data-preview-url', previewUrl);
+  img.style.display = 'block';
+  box.classList.add('loaded');
+}
+
 /* Photo upload */
 function loadPhoto(inp){
-  if(!inp.files||!inp.files[0]) return;
-  var r=new FileReader();
-  r.onload=function(e){
-    var img = inp.parentNode.querySelector('img');
-    img.src=e.target.result;
-    inp.parentNode.classList.add('loaded');
-  };
-  r.readAsDataURL(inp.files[0]);
+  previewUpload(inp);
 }
 
 /* Signature upload */
 function loadSig(inp){
-  if(!inp.files||!inp.files[0]) return;
-  var r=new FileReader();
-  r.onload=function(e){
-    var box = inp.closest('.sig-box');
-    box.querySelector('img').src=e.target.result;
-    box.classList.add('loaded');
-  };
-  r.readAsDataURL(inp.files[0]);
+  previewUpload(inp);
 }
 
 /* Auto-sum income */
@@ -864,8 +924,10 @@ function doSubmit(){
     document.getElementById('spn').style.display='none';
     if(res && res.success !== undefined) {
       toast(res.success?'✓ '+res.message:'✗ '+res.message,!res.success);
+      if(res.success) localStorage.removeItem('bikeFormDraft_' + document.title);
     } else {
       toast('✓ Application submitted successfully!', false);
+      localStorage.removeItem('bikeFormDraft_' + document.title);
     }
   })
   .catch(e => {
