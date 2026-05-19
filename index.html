@@ -447,9 +447,8 @@ select.f-in {
   <div class="header">
     <div style="display:flex; gap:16px; align-items:center; margin-bottom:5px;">
       <img src="logo.jpg" alt="Union Logo" class="logo-image" />
-      <img src="housingfinancelogo.png" alt="Housing Finance Logo" class="logo-image" />
     </div>
-    <div class="logo-word">Union & HFB</div>
+    <div class="logo-word">Union</div>
     <div class="form-title">BIKE LOAN APPLICATION FORM</div>
   </div>
 
@@ -461,19 +460,19 @@ select.f-in {
     </div>
     <div class="meta-item">
       <label>Union Branch</label>
-      <select class="meta-input" id="branch">
-        <option value="">— Select Branch —</option>
-        <option>Kampala Central</option><option>Kawempe</option>
-        <option>Makindye</option><option>Nakawa</option>
-        <option>Rubaga</option><option>Entebbe</option>
-        <option>Wakiso</option><option>Mukono</option>
-        <option>Jinja</option><option>Mbale</option>
-        <option>Gulu</option><option>Mbarara</option>
-        <option>Masaka</option><option>Fort Portal</option>
-        <option>Lira</option><option>Arua</option>
-        <option>Soroti</option><option>Kabale</option>
-        <option>Hoima</option><option>Mityana</option>
-      </select>
+      <input list="branchList" class="meta-input" id="branch" placeholder="Type or select branch..."/>
+      <datalist id="branchList">
+        <option value="Kampala Central"></option><option value="Kawempe"></option>
+        <option value="Makindye"></option><option value="Nakawa"></option>
+        <option value="Rubaga"></option><option value="Entebbe"></option>
+        <option value="Wakiso"></option><option value="Mukono"></option>
+        <option value="Jinja"></option><option value="Mbale"></option>
+        <option value="Gulu"></option><option value="Mbarara"></option>
+        <option value="Masaka"></option><option value="Fort Portal"></option>
+        <option value="Lira"></option><option value="Arua"></option>
+        <option value="Soroti"></option><option value="Kabale"></option>
+        <option value="Hoima"></option><option value="Mityana"></option>
+      </datalist>
     </div>
   </div>
 

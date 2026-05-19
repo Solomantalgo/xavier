@@ -461,20 +461,20 @@ select.f-in {
     </div>
     <div class="meta-item">
       <label>Union Branch Of Application</label>
-      <select class="meta-input" id="branch">
-        <option value="">— Select Branch —</option>
-        <option>Tororo</option>
-        <option>Kampala Central</option><option>Kawempe</option>
-        <option>Makindye</option><option>Nakawa</option>
-        <option>Rubaga</option><option>Entebbe</option>
-        <option>Wakiso</option><option>Mukono</option>
-        <option>Jinja</option><option>Mbale</option>
-        <option>Gulu</option><option>Mbarara</option>
-        <option>Masaka</option><option>Fort Portal</option>
-        <option>Lira</option><option>Arua</option>
-        <option>Soroti</option><option>Kabale</option>
-        <option>Hoima</option><option>Mityana</option>
-      </select>
+      <input list="branchList" class="meta-input" id="branch" placeholder="Type or select branch..."/>
+      <datalist id="branchList">
+        <option value="Tororo"></option>
+        <option value="Kampala Central"></option><option value="Kawempe"></option>
+        <option value="Makindye"></option><option value="Nakawa"></option>
+        <option value="Rubaga"></option><option value="Entebbe"></option>
+        <option value="Wakiso"></option><option value="Mukono"></option>
+        <option value="Jinja"></option><option value="Mbale"></option>
+        <option value="Gulu"></option><option value="Mbarara"></option>
+        <option value="Masaka"></option><option value="Fort Portal"></option>
+        <option value="Lira"></option><option value="Arua"></option>
+        <option value="Soroti"></option><option value="Kabale"></option>
+        <option value="Hoima"></option><option value="Mityana"></option>
+      </datalist>
     </div>
   </div>
 
@@ -490,19 +490,13 @@ select.f-in {
           <span class="photo-overlay">Click to change</span>
           <input type="file" id="photoFile" accept="image/*" onchange="loadPhoto(this)"/>
         </div>
-        <div class="photo-box" id="lc1Box" title="Click to upload LC1 Letter" style="margin-left:8px;">
-          <span class="photo-label">ATTACH<br>LC1<br>LETTER<br>PHOTO</span>
-          <img id="lc1Img" alt="photo"/>
-          <span class="photo-overlay">Click to change</span>
-          <input type="file" id="lc1File" accept="image/*" onchange="loadPhoto(this)"/>
-        </div>
       </div>
 
-      <div class="f-row" style="padding-right:220px;">
+      <div class="f-row" style="padding-right:110px;">
         <div class="f-field" style="flex:1.1"><span class="f-lbl">Surname</span><input class="f-in" type="text" id="surname" placeholder="Family name"/></div>
         <div class="f-field" style="flex:1.6"><span class="f-lbl">Other Names</span><input class="f-in" type="text" id="otherNames" placeholder="First &amp; middle"/></div>
       </div>
-      <div class="f-row" style="padding-right:220px;">
+      <div class="f-row" style="padding-right:110px;">
         <div class="f-field"><span class="f-lbl">Village Of Residence</span><input class="f-in" type="text" id="village"/></div>
         <div class="f-field"><span class="f-lbl">Sub County Of Residence</span><input class="f-in" type="text" id="subCounty"/></div>
       </div>
@@ -532,10 +526,18 @@ select.f-in {
         <label class="chk-opt"><input type="radio" name="marital" value="Divorced"/> Divorced</label>
         <label class="chk-opt"><input type="radio" name="marital" value="Widow/Widower"/> Widow/Widower</label>
       </div>
-      <div class="chk-row" style="margin-bottom:0;">
+      <div class="chk-row" style="margin-bottom:14px;">
         <span class="chk-lbl">Type Of Residence:</span>
         <label class="chk-opt"><input type="radio" name="res" value="Rented"/> Rented</label>
         <label class="chk-opt"><input type="radio" name="res" value="Owned"/> Owned</label>
+      </div>
+      <div class="f-row" style="margin-bottom:0;">
+        <div class="f-field" style="flex:1">
+          <span class="f-lbl">LC1 Chairman's Recommendation Letter Photo</span>
+          <div class="sig-box" title="Click to upload LC1 Letter" style="height:50px; border: 1.5px dashed var(--green); max-width:300px; margin-left:0;">
+            <img id="lc1Img" alt="photo"/><span>Click to Upload LC1 Letter</span><input type="file" id="lc1File" accept="image/*" onchange="loadPhoto(this)"/>
+          </div>
+        </div>
       </div>
 
     </div>
