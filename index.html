@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Union Bike Loan Application</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #1a5c45;
+  --green-light: #e5f2ed;
+  --green-mid: #1a8c6e;
+}
+
+body {
+  font-family: Calibri, Arial, sans-serif;
+  background: #c8c8c8;
+  font-size: 15px;
+  color: #000;
+  padding: 16px 0 56px;
+}
+
+/* ── Toolbar (Print button sits here) ── */
+.toolbar {
+  max-width: 860px;
+  margin: 0 auto 12px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 8px;
+}
+
+.btn-print {
+  background: #fff;
+  color: var(--green);
+  border: 2px solid var(--green);
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background .15s, color .15s;
+}
+.btn-print:hover { background: var(--green); color: #fff; }
+.btn-print svg { width: 16px; height: 16px; fill: currentColor; }
+
+/* ── White page card ── */
+.page {
+  background: #fff;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 32px 36px;
+  box-shadow: 0 3px 18px rgba(0,0,0,.3);
+  border-radius: 4px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.logo-image {
+  max-height: 80px;
+  margin-bottom: 5px;
+}
+.logo-word {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 1px;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+.form-title {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: .4px;
+}
+
+/* ── Meta line ── */
+.meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.meta-item { display: flex; align-items: flex-end; gap: 6px; }
+.meta-item label { white-space: nowrap; font-weight: 600; }
+.meta-input {
+  border: none;
+  border-bottom: 1.5px solid #000;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 2px 4px;
+  background: transparent;
+  color: #000;
+}
+.meta-input[type=date] { width: 155px; cursor: default; }
+select.meta-input {
+  width: 200px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23444'/%3E%3C/svg%3E") no-repeat right 4px center;
+  padding-right: 18px;
+  cursor: pointer;
+}
+
+/* ── Section block ── */
+.section {
+  border: 1.5px solid #000;
+  margin-bottom: 10px;
+  border-radius: 2px;
+}
+.section-header {
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 7px 11px;
+  line-height: 1.4;
+}
+.section-header em { font-style: italic; }
+.section-body {
+  padding: 14px 14px 12px;
+  position: relative;
+}
+
+/* ── Passport photo ── */
+.photo-wrap {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+.photo-box {
+  width: 96px;
+  height: 108px;
+  border: 1.5px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f9f9f9;
+  border-radius: 2px;
+}
+.photo-box img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+}
+.photo-box input[type=file] {
+  position: absolute; inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%; height: 100%;
+}
+.photo-box.loaded .photo-label { display: none; }
+.photo-box.loaded img { display: block; }
+.photo-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(26,92,69,.88);
+  color: #fff; font-size: 9px; font-weight: 700;
+  text-align: center; padding: 3px;
+  display: none; pointer-events: none;
+}
+.photo-box.loaded .photo-overlay { display: block; }
+
+/* ── Signature Box ── */
+.sig-box {
+  height: 36px; border: 1.5px dashed #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #555; cursor: pointer;
+  position: relative; overflow: hidden; background: #f9f9f9; border-radius: 2px;
+  flex: 1; min-width: 100px; margin-left: 6px;
+}
+.sig-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: none; }
+.sig-box input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.sig-box.loaded span { display: none; }
+.sig-box.loaded img { display: block; }
+
+/* ── Field rows ── */
+.f-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.f-row:last-child { margin-bottom: 0; }
+
+.f-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 130px;
+}
+
+.f-lbl {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #333;
+}
+.f-in {
+  border: none;
+  border-bottom: 1.5px solid #888;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 4px 3px;
+  width: 100%;
+  background: transparent;
+  color: #000;
+  transition: border-color .15s, background .15s;
+}
+.f-in:focus {
+  border-bottom-color: var(--green);
+  background: #edf9f5;
+}
+.f-in.mono { font-family: 'Courier New', monospace; letter-spacing: .4px; }
+select.f-in {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%23444'/%3E%3C/svg%3E") no-repeat right 4px center;
+  padding-right: 18px;
+  cursor: pointer;
+}
+
+/* ── Radio / checkbox ── */
+.chk-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin-bottom: 12px;
+}
+.chk-row:last-child { margin-bottom: 0; }
+.chk-lbl { font-size: 13px; font-weight: 600; margin-right: 10px; white-space: nowrap; }
+.chk-opt {
+  display: flex; align-items: center;
+  gap: 4px; margin-right: 16px;
+  font-size: 13.5px; cursor: pointer;
+  white-space: nowrap;
+}
+.chk-opt input { width: 15px; height: 15px; accent-color: var(--green); margin: 0; cursor: pointer; }
+
+/* ── Inner sub-headers ── */
+.inner-head {
+  font-weight: 700; font-size: 13px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin: 12px 0 7px;
+  border-bottom: 1px solid #c8e8df;
+  padding-bottom: 3px;
+}
+.inner-head:first-child { margin-top: 0; }
+
+/* ── Guarantor panels ── */
+.g-wrap { display: none; }
+.g-wrap.active { display: block; }
+.g-note { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; color: #555; }
+.g-block { border: 1px solid #aaa; margin-bottom: 8px; border-radius: 3px; }
+.g-block:last-child { margin-bottom: 0; }
+.g-block-title {
+  background: var(--green-light); font-size: 13px;
+  font-weight: 700; padding: 6px 10px;
+  border-bottom: 1px solid #aaa;
+}
+.g-block-body { padding: 10px; }
+
+/* ── Signature lines ── */
+.sig-row { display: flex; gap: 24px; margin-top: 10px; flex-wrap: wrap; }
+.sig-field { flex: 1; display: flex; align-items: flex-end; gap: 6px; font-size: 13px; min-width: 180px; }
+.sig-line { flex: 1; border-bottom: 1.5px solid #000; height: 24px; min-width: 60px; }
+
+/* ── Section E info ── */
+.info-p { font-size: 13.5px; line-height: 1.7; }
+
+/* ── Terms ── */
+.terms { font-size: 12.5px; margin: 8px 0 0; }
+.terms-title { font-weight: 700; margin-bottom: 4px; }
+.terms ul { padding-left: 16px; }
+.terms li { margin-bottom: 4px; line-height: 1.5; }
+
+/* ── Agent block ── */
+.agent-title { font-weight: 700; font-size: 13px; margin: 12px 0 7px; }
+
+/* ── Declaration ── */
+.decl { font-size: 13px; line-height: 1.7; margin-bottom: 10px; }
+
+/* ── Submit ── */
+.submit-wrap { text-align: center; margin-top: 22px; }
+.btn-sub {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  padding: 13px 60px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  border-radius: 5px;
+  cursor: pointer;
+  letter-spacing: .3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  transition: background .15s;
+}
+.btn-sub:hover { background: #0f3d2c; }
+.btn-sub:disabled { background: #888; cursor: not-allowed; }
+
+.spin {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--green); color: #fff;
+  padding: 12px 30px; border-radius: 5px;
+  font-weight: 700; font-size: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+  opacity: 0; z-index: 999; pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#toast.err  { background: #b91c1c; }
+
+/* ── Page footer ── */
+.page-foot {
+  display: flex; justify-content: space-between;
+  font-size: 11.5px; font-weight: 700;
+  color: #555; margin-top: 12px;
+  border-top: 1px solid #ddd; padding-top: 6px;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — MOBILE
+══════════════════════════════════════ */
+@media (max-width: 700px) {
+  body { padding: 0 0 48px; background: #fff; }
+
+  .toolbar { padding: 10px 10px 0; }
+
+  .page {
+    padding: 16px 14px 28px;
+    box-shadow: none;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .form-title { font-size: 14px; }
+
+  .meta-line { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .meta-item { width: 100%; }
+  select.meta-input, .meta-input[type=date] { width: 100%; }
+
+  /* Photo wraps inline above the name fields on mobile */
+  .photo-wrap {
+    position: static;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: center;
+  }
+  .photo-box { width: 110px; height: 124px; }
+
+  .f-row { flex-direction: column; gap: 10px; }
+  .f-field { min-width: 100%; flex: none; }
+  /* Remove padding-right that reserved space for the absolute photo */
+  .f-row[style*="padding-right"] { padding-right: 0 !important; }
+
+  .sig-row { flex-direction: column; gap: 14px; }
+  .sig-field { min-width: 100%; }
+
+  .btn-sub {
+    padding: 13px 32px;
+    font-size: 14px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ══════════════════════════════════════
+   PRINT STYLES
+══════════════════════════════════════ */
+@media print {
+  body { background: #fff; padding: 0; font-size: 11.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .toolbar { display: none !important; }
+  .page {
+    max-width: 100%;
+    padding: 10px 16px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .submit-wrap { display: none !important; }
+  #toast { display: none !important; }
+  .section { page-break-inside: avoid; }
+  .f-in, .meta-input { border-bottom: 1px solid #000; }
+  .f-in:focus { background: transparent; }
+  .section-header { -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toolbar with Print / Save as PDF button -->
+<div class="toolbar">
+  <button class="btn-print" onclick="window.print()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+    </svg>
+    Print / Save as PDF
+  </button>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div style="display:flex; gap:16px; align-items:center; margin-bottom:5px;">
+      <img src="logo.jpg" alt="Union Logo" class="logo-image" />
+      <img src="housingfinancelogo.png" alt="Housing Finance Logo" class="logo-image" />
+    </div>
+    <div class="logo-word">Union & HFB</div>
+    <div class="form-title">BIKE LOAN APPLICATION FORM</div>
+  </div>
+
+  <!-- META: Date + Branch -->
+  <div class="meta-line">
+    <div class="meta-item">
+      <label>Application Date</label>
+      <input class="meta-input" type="date" id="appDate"/>
+    </div>
+    <div class="meta-item">
+      <label>Union Branch</label>
+      <select class="meta-input" id="branch">
+        <option value="">— Select Branch —</option>
+        <option>Kampala Central</option><option>Kawempe</option>
+        <option>Makindye</option><option>Nakawa</option>
+        <option>Rubaga</option><option>Entebbe</option>
+        <option>Wakiso</option><option>Mukono</option>
+        <option>Jinja</option><option>Mbale</option>
+        <option>Gulu</option><option>Mbarara</option>
+        <option>Masaka</option><option>Fort Portal</option>
+        <option>Lira</option><option>Arua</option>
+        <option>Soroti</option><option>Kabale</option>
+        <option>Hoima</option><option>Mityana</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ══ A. APPLICANT DETAILS ══ -->
+  <div class="section">
+    <div class="section-header">A. APPLICANT DETAILS* <em>(Attach copy of National ID, passport photo &amp; Village Chairman's recommendation Letter)</em></div>
+    <div class="section-body">
+
+      <div class="photo-wrap">
+        <div class="photo-box" id="photoBox" title="Click to upload passport photo">
+          <span class="photo-label">ATTACH<br>CLIENT<br>PASSPORT<br>PHOTO</span>
+          <img id="photoImg" alt="photo"/>
+          <span class="photo-overlay">Click to change</span>
+          <input type="file" id="photoFile" accept="image/*" onchange="loadPhoto(this)"/>
+        </div>
+      </div>
+
+      <div class="f-row" style="padding-right:110px;">
+        <div class="f-field" style="flex:1.1"><span class="f-lbl">Surname</span><input class="f-in" type="text" id="surname" placeholder="Family name"/></div>
+        <div class="f-field" style="flex:1.6"><span class="f-lbl">Other Names</span><input class="f-in" type="text" id="otherNames" placeholder="First &amp; middle"/></div>
+      </div>
+      <div class="f-row" style="padding-right:110px;">
+        <div class="f-field"><span class="f-lbl">Village Of Residence</span><input class="f-in" type="text" id="village"/></div>
+        <div class="f-field"><span class="f-lbl">Sub County Of Residence</span><input class="f-in" type="text" id="subCounty"/></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field" style="flex:1.5"><span class="f-lbl">District Of Residence</span><input class="f-in" type="text" id="district"/></div>
+        <div class="f-field"><span class="f-lbl">Date Of Birth</span><input class="f-in" type="date" id="dob"/></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field" style="flex:1.2"><span class="f-lbl">NIN</span><input class="f-in mono" type="text" id="nin" placeholder="CM••••••••••••" maxlength="14"/></div>
+        <div class="f-field">
+          <div class="chk-row" style="margin-bottom:0;padding-bottom:3px;margin-top:auto;">
+            <span class="chk-lbl">Gender :</span>
+            <label class="chk-opt"><input type="radio" name="gender" value="Male"/> Male</label>
+            <label class="chk-opt"><input type="radio" name="gender" value="Female"/> Female</label>
+          </div>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><span class="f-lbl">Phone No 1</span><input class="f-in" type="tel" id="phone1" placeholder="+256 7XX XXX XXX"/></div>
+        <div class="f-field"><span class="f-lbl">Phone No 2</span><input class="f-in" type="tel" id="phone2"/></div>
+      </div>
+      <div class="chk-row">
+        <span class="chk-lbl">Marital Status</span>
+        <label class="chk-opt"><input type="radio" name="marital" value="Single"/> Single</label>
+        <label class="chk-opt"><input type="radio" name="marital" value="Married"/> Married</label>
+        <label class="chk-opt"><input type="radio" name="marital" value="Divorced"/> Divorced</label>
+        <label class="chk-opt"><input type="radio" name="marital" value="Widow/Widower"/> Widow/Widower</label>
+      </div>
+      <div class="chk-row" style="margin-bottom:0;">
+        <span class="chk-lbl">Type Of Residence:</span>
+        <label class="chk-opt"><input type="radio" name="res" value="Rented"/> Rented</label>
+        <label class="chk-opt"><input type="radio" name="res" value="Owned"/> Owned</label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ B. TYPE OF BIKE ══ -->
+  <div class="section">
+    <div class="section-header">B. TYPE OF BIKE APPLIED FOR</div>
+    <div class="section-body">
+      <div class="chk-row" style="margin-bottom:0;">
+        <label class="chk-opt" style="margin-right:60px;"><input type="radio" name="bikeType" value="New Bike"/> <strong>New Bike</strong></label>
+        <label class="chk-opt"><input type="radio" name="bikeType" value="Second Hand Bike"/> <strong>Second Hand Bike</strong></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ C. EXCHANGE BIKE ══ -->
+  <div class="section">
+    <div class="section-header">C. DETAILS OF FUEL BIKE TO BE EXCHANGED <em>(Only Where Applicable/Optional)</em></div>
+    <div class="section-body">
+      <div class="f-row">
+        <div class="f-field"><span class="f-lbl">BIKE NUMBER PLATE</span><input class="f-in mono" type="text" id="exPlate" placeholder="UAA 000A"/></div>
+        <div class="f-field" style="flex:1.5"><span class="f-lbl">LOGBOOK NAMES</span><input class="f-in" type="text" id="exLogbook"/></div>
+      </div>
+      <div class="f-row" style="margin-bottom:0;">
+        <div class="f-field" style="flex:1.5"><span class="f-lbl">BIKE TYPE</span><input class="f-in" type="text" id="exType" placeholder="e.g. Boxer, TVS, Bajaj…"/></div>
+        <div class="f-field"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ D. WORK, INCOME & EXPENSES ══ -->
+  <div class="section">
+    <div class="section-header">D. WORK, INCOME &amp; EXPENSE DETAILS</div>
+    <div class="section-body">
+
+      <div class="inner-head">WORK LOCATION DETAILS:</div>
+      <div class="f-row"><div class="f-field"><span class="f-lbl">Work/Stage Name:</span><input class="f-in" type="text" id="workName"/></div></div>
+      <div class="f-row"><div class="f-field"><span class="f-lbl">Work/Stage Location:</span><input class="f-in" type="text" id="workLoc"/></div></div>
+      <div class="f-row">
+        <div class="f-field" style="flex:1.6"><span class="f-lbl">Work/Stage Chairman's Name:</span><input class="f-in" type="text" id="chairName"/></div>
+        <div class="f-field"><span class="f-lbl">Contact</span><input class="f-in" type="tel" id="chairContact"/></div>
+      </div>
+
+      <div class="inner-head">SOURCES OF INCOME:</div>
+      <div class="f-row">
+        <div class="f-field" style="flex:2"><span class="f-lbl">Source 1</span><input class="f-in" type="text" id="src1"/></div>
+        <div class="f-field"><span class="f-lbl">Daily Income (UGX)</span><input class="f-in" type="number" id="inc1" placeholder="0" min="0" oninput="sumInc()"/></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field" style="flex:2"><span class="f-lbl">Source 2</span><input class="f-in" type="text" id="src2"/></div>
+        <div class="f-field"><span class="f-lbl">Daily Income (UGX)</span><input class="f-in" type="number" id="inc2" placeholder="0" min="0" oninput="sumInc()"/></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><span class="f-lbl">Total Income from all sources (UGX)</span><input class="f-in" type="number" id="totInc" placeholder="Auto-calculated"/></div>
+        <div class="f-field"></div>
+      </div>
+
+      <div class="inner-head">MAJOR DAILY EXPENSES:</div>
+      <div class="f-row">
+        <div class="f-field" style="flex:2"><span class="f-lbl">Expense 1</span><input class="f-in" type="text" id="exp1"/></div>
+        <div class="f-field"><span class="f-lbl">Daily Cost (UGX)</span><input class="f-in" type="number" id="cost1" placeholder="0" min="0" oninput="sumExp()"/></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field" style="flex:2"><span class="f-lbl">Expense 2</span><input class="f-in" type="text" id="exp2"/></div>
+        <div class="f-field"><span class="f-lbl">Daily Cost (UGX)</span><input class="f-in" type="number" id="cost2" placeholder="0" min="0" oninput="sumExp()"/></div>
+      </div>
+      <div class="f-row">
+        <div class="f-field"><span class="f-lbl">Total Daily Expense (UGX)</span><input class="f-in" type="number" id="totExp" placeholder="Auto-calculated"/></div>
+        <div class="f-field"></div>
+      </div>
+
+      <div class="chk-row" style="margin-bottom:0;">
+        <span class="chk-lbl">HAS RIDING PERMIT</span>
+        <label class="chk-opt"><input type="radio" name="permit" value="Yes"/> Yes</label>
+        <label class="chk-opt"><input type="radio" name="permit" value="No"/> No</label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ E. NSSF ══ -->
+  <div class="section">
+    <div class="section-header">E. NSSF SMART LIFE COMMITMENT</div>
+    <div class="section-body">
+      <p class="info-p">As part of our commitment to your financial security, we will support you in opening an <strong>NSSF Smart Life</strong> savings account to help you save while you work. This is a requirement for receiving a Union EV bike, and we will guide you through the registration process every step of the way.</p>
+    </div>
+  </div>
+
+  <!-- ══ F. GUARANTORS ══ -->
+  <div class="section">
+    <div class="section-header">F. GUARANTOR DETAILS</div>
+    <div class="section-body">
+
+      <div class="chk-row" style="margin-bottom:12px;">
+        <label class="chk-opt"><input type="radio" name="gType" value="Union Client" checked onchange="switchG()"/> I have a Union client guarantor <em>(1 required)</em></label>
+        <label class="chk-opt" style="margin-left:18px;"><input type="radio" name="gType" value="Non-Union" onchange="switchG()"/> No Union client guarantor <em>(2 required)</em></label>
+      </div>
+
+      <!-- Union-client panel -->
+      <div class="g-wrap active" id="panelU">
+        <div class="g-note">FOR APPLICANT WITH UNION CLIENT AS GUARANTOR (ONLY ONE IS REQUIRED)</div>
+        <div class="f-row">
+          <div class="f-field" style="flex:1.5"><span class="f-lbl">Name</span><input class="f-in" type="text" id="g1n"/></div>
+          <div class="f-field"><span class="f-lbl">Contacts</span><input class="f-in" type="tel" id="g1c"/></div>
+          <div class="f-field"><span class="f-lbl">NIN</span><input class="f-in mono" type="text" id="g1nin"/></div>
+        </div>
+        <div class="f-row" style="margin-bottom:0;">
+          <div class="f-field"><span class="f-lbl">Union Loan ID</span><input class="f-in mono" type="text" id="g1lid"/></div>
+          <div class="f-field"><span class="f-lbl">Union Bike No. Plate</span><input class="f-in mono" type="text" id="g1pl" placeholder="UAA 000A"/></div>
+          <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
+            <div class="sig-box" title="Click to upload signature">
+              <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Non-union panel -->
+      <div class="g-wrap" id="panelNU">
+        <div class="g-note">FOR APPLICANT WITHOUT UNION CLIENT AS GUARANTOR (TWO ARE REQUIRED)</div>
+        <div class="g-block">
+          <div class="g-block-title">Guarantor 1:</div>
+          <div class="g-block-body">
+            <div class="f-row">
+              <div class="f-field" style="flex:1.5"><span class="f-lbl">Name</span><input class="f-in" type="text" id="nu1n"/></div>
+              <div class="f-field"><span class="f-lbl">Contacts</span><input class="f-in" type="tel" id="nu1c"/></div>
+              <div class="f-field"><span class="f-lbl">NIN</span><input class="f-in mono" type="text" id="nu1nin"/></div>
+            </div>
+            <div class="f-row" style="margin-bottom:0;">
+              <div class="f-field"><span class="f-lbl">Source of Income</span><input class="f-in" type="text" id="nu1src"/></div>
+              <div class="f-field"><span class="f-lbl">Location</span><input class="f-in" type="text" id="nu1loc"/></div>
+              <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
+                <div class="sig-box" title="Click to upload signature">
+                  <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="g-block">
+          <div class="g-block-title">Guarantor 2:</div>
+          <div class="g-block-body">
+            <div class="f-row">
+              <div class="f-field" style="flex:1.5"><span class="f-lbl">Name</span><input class="f-in" type="text" id="nu2n"/></div>
+              <div class="f-field"><span class="f-lbl">Contacts</span><input class="f-in" type="tel" id="nu2c"/></div>
+              <div class="f-field"><span class="f-lbl">NIN</span><input class="f-in mono" type="text" id="nu2nin"/></div>
+            </div>
+            <div class="f-row" style="margin-bottom:0;">
+              <div class="f-field"><span class="f-lbl">Source of Income</span><input class="f-in" type="text" id="nu2src"/></div>
+              <div class="f-field"><span class="f-lbl">Location</span><input class="f-in" type="text" id="nu2loc"/></div>
+              <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
+                <div class="sig-box" title="Click to upload signature">
+                  <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ G. DECLARATION ══ -->
+  <div class="section">
+    <div class="section-header">G. DECLARATION &amp; SIGNATURE</div>
+    <div class="section-body">
+      <p class="decl">I hereby declare that the information provided is true and accurate to the best of my knowledge and I consent to all the terms and conditions. I authorize the lender to verify any information provided in this application. <em>(Read the attached Terms & Conditions)</em></p>
+      <div class="sig-row" style="align-items:center;">
+        <div class="sig-field" style="align-items:center;">Applicant's Signature: 
+          <div class="sig-box" title="Click to upload signature">
+            <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+          </div>
+        </div>
+        <div class="sig-field" style="flex:.7;">Date: <input type="date" class="f-in" style="flex:1" id="appSigDate"/></div>
+      </div>
+
+      <!-- Branch manager -->
+      <div style="margin-top:14px;border-top:1px solid #aaa;padding-top:10px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:8px;">UNION BRANCH MANAGER'S APPROVAL</div>
+        <div class="f-row">
+          <div class="f-field" style="flex:1.8"><span class="f-lbl">Branch Manager's Name</span><div style="border-bottom:1.5px solid #000;height:24px;"></div></div>
+          <div class="f-field"><span class="f-lbl">Contact</span><div style="border-bottom:1.5px solid #000;height:24px;"></div></div>
+        </div>
+        <div class="f-row" style="margin-bottom:0;">
+          <div class="f-field"><span class="f-lbl">Signature</span>
+            <div class="sig-box" title="Click to upload signature">
+              <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+            </div>
+          </div>
+          <div class="f-field"><span class="f-lbl">Date</span><input type="date" class="f-in" id="bmSigDate"/></div>
+          <div class="f-field"><span class="f-lbl">Branch Name</span><input type="text" class="f-in" id="bmBranch"/></div>
+        </div>
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div class="terms" style="border-top:1px solid #aaa;padding-top:10px;margin-top:12px;">
+        <div class="terms-title">TERMS AND CONDITIONS:</div>
+        <ul>
+          <li>Guarantor should be strictly Union-Spiro active client with good payment history with a copy of his/her National ID.</li>
+          <li>Must attach applicant passport photo and copy of National ID.</li>
+          <li>Must attach applicant's village of residence recommendation letter.</li>
+          <li>Should be willing to make Daily Loan Payment at the swap station or advance payment.</li>
+          <li>Should be willing to open an NSSF Smart Life savings account to help you save while you work.</li>
+          <li>Attach a log book of the fuel bike you are willing to exchange, where applicable.</li>
+        </ul>
+      </div>
+
+      <!-- EV Agent -->
+      <div class="agent-title">EV CHAMPION/AGENT DETAILS:</div>
+      <div class="f-row" style="margin-bottom:0;">
+        <div class="f-field" style="flex:1.6"><span class="f-lbl">Name</span><input class="f-in" type="text" id="agName"/></div>
+        <div class="f-field"><span class="f-lbl">Agent/Champion ID</span><input class="f-in" type="text" id="agId"/></div>
+        <div class="f-field"><span class="f-lbl">Division/Region</span><input class="f-in" type="text" id="agDiv"/></div>
+        <div class="f-field"><span class="f-lbl">Contact</span><input class="f-in" type="tel" id="agCont"/></div>
+        <div class="f-field" style="flex:.7"><span class="f-lbl">Signature</span>
+          <div class="sig-box" title="Click to upload signature">
+            <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-wrap">
+    <button class="btn-sub" onclick="doSubmit()">
+      <span id="btnTxt">Submit Application</span>
+      <div class="spin" id="spn"></div>
+    </button>
+  </div>
+
+  <div class="page-foot">
+    <span>This Form Is Not For Sale!</span>
+    <span>1</span>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// Google Apps Script Web App URL
+// You MUST replace this with your actual Web App URL
+// after deploying the new Code.gs script in Apps Script.
+// ============================================================
+const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzNPxxB-0NCodzqt1wgr4Yip7WduwX9guCwnVQIhwOcvag6ngdQxKfCtqlYMolTe3jTw/exec';
+
+/* Auto-fill today's date */
+(function(){
+  var d=new Date(),
+      y=d.getFullYear(),
+      m=String(d.getMonth()+1).padStart(2,'0'),
+      dd=String(d.getDate()).padStart(2,'0');
+  document.getElementById('appDate').value=y+'-'+m+'-'+dd;
+})();
+
+/* Photo upload */
+function loadPhoto(inp){
+  if(!inp.files||!inp.files[0]) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    document.getElementById('photoImg').src=e.target.result;
+    document.getElementById('photoBox').classList.add('loaded');
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+
+/* Signature upload */
+function loadSig(inp){
+  if(!inp.files||!inp.files[0]) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var box = inp.closest('.sig-box');
+    box.querySelector('img').src=e.target.result;
+    box.classList.add('loaded');
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+
+/* Auto-sum income */
+function sumInc(){
+  var a=parseFloat(document.getElementById('inc1').value)||0;
+  var b=parseFloat(document.getElementById('inc2').value)||0;
+  document.getElementById('totInc').value=(a+b)||'';
+}
+
+/* Auto-sum expense */
+function sumExp(){
+  var a=parseFloat(document.getElementById('cost1').value)||0;
+  var b=parseFloat(document.getElementById('cost2').value)||0;
+  document.getElementById('totExp').value=(a+b)||'';
+}
+
+/* Guarantor toggle */
+function switchG(){
+  var isU=document.querySelector('input[name=gType]:checked').value==='Union Client';
+  document.getElementById('panelU').className ='g-wrap'+(isU?' active':'');
+  document.getElementById('panelNU').className='g-wrap'+(!isU?' active':'');
+}
+
+/* Read radio value */
+function r(n){var e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:'';}
+
+/* Collect form data */
+function collect(){
+  var isU=r('gType')==='Union Client';
+  return {
+    applicationDate:document.getElementById('appDate').value,
+    unionBranch:document.getElementById('branch').value,
+    surname:document.getElementById('surname').value,
+    otherNames:document.getElementById('otherNames').value,
+    village:document.getElementById('village').value,
+    subCounty:document.getElementById('subCounty').value,
+    district:document.getElementById('district').value,
+    dob:document.getElementById('dob').value,
+    nin:document.getElementById('nin').value,
+    gender:r('gender'), phone1:document.getElementById('phone1').value,
+    phone2:document.getElementById('phone2').value,
+    maritalStatus:r('marital'), residence:r('res'),
+    bikeType:r('bikeType'),
+    exchangePlate:document.getElementById('exPlate').value,
+    exchangeLogbook:document.getElementById('exLogbook').value,
+    exchangeBikeType:document.getElementById('exType').value,
+    workName:document.getElementById('workName').value,
+    workLocation:document.getElementById('workLoc').value,
+    chairmanName:document.getElementById('chairName').value,
+    chairmanContact:document.getElementById('chairContact').value,
+    incomeSource1:document.getElementById('src1').value,
+    dailyIncome1:document.getElementById('inc1').value,
+    incomeSource2:document.getElementById('src2').value,
+    dailyIncome2:document.getElementById('inc2').value,
+    totalIncome:document.getElementById('totInc').value,
+    expense1:document.getElementById('exp1').value,
+    dailyCost1:document.getElementById('cost1').value,
+    expense2:document.getElementById('exp2').value,
+    dailyCost2:document.getElementById('cost2').value,
+    totalExpense:document.getElementById('totExp').value,
+    ridingPermit:r('permit'),
+    guarantorType:r('gType'),
+    g1Name    :isU?document.getElementById('g1n').value    :document.getElementById('nu1n').value,
+    g1Contact :isU?document.getElementById('g1c').value    :document.getElementById('nu1c').value,
+    g1NIN     :isU?document.getElementById('g1nin').value  :document.getElementById('nu1nin').value,
+    g1LoanId  :isU?document.getElementById('g1lid').value  :'',
+    g1BikePlate:isU?document.getElementById('g1pl').value  :'',
+    g1IncomeSource:isU?'':document.getElementById('nu1src').value,
+    g1Location:isU?'':document.getElementById('nu1loc').value,
+    g2Name    :isU?'':document.getElementById('nu2n').value,
+    g2Contact :isU?'':document.getElementById('nu2c').value,
+    g2NIN     :isU?'':document.getElementById('nu2nin').value,
+    g2IncomeSource:isU?'':document.getElementById('nu2src').value,
+    g2Location:isU?'':document.getElementById('nu2loc').value,
+  };
+}
+
+/* Toast notification */
+function toast(msg,err){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className=err?'err':'';
+  void t.offsetWidth; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},4000);
+}
+
+/* Submit via Fetch API */
+function doSubmit(){
+  var d=collect();
+  if(!d.surname||!d.phone1){toast('⚠ Surname and Phone No. 1 are required',true);return;}
+  if(GOOGLE_APP_SCRIPT_URL === 'YOUR_WEB_APP_URL_HERE'){
+    toast('⚠ Setup incomplete: Missing Google Apps Script URL in code', true);
+    return;
+  }
+
+  var btn=document.querySelector('.btn-sub');
+  btn.disabled=true;
+  document.getElementById('btnTxt').textContent='Submitting…';
+  document.getElementById('spn').style.display='block';
+
+  // Using standard fetch with POST
+  // We use no-cors if standard cors fails, but standard POST usually works for GAS if deployed correctly
+  // However, GAS redirects the POST, so sometimes it's best to send form data or JSON with mode 'no-cors'
+  // But no-cors prevents reading the response JSON. 
+  // Let's try standard fetch first.
+  
+  fetch(GOOGLE_APP_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(d),
+  })
+  .then(response => {
+    // If the response is not ok, but we get a 200, GAS might be returning HTML instead of JSON if errors occur
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(res => {
+    btn.disabled=false;
+    document.getElementById('btnTxt').textContent='Submit Application';
+    document.getElementById('spn').style.display='none';
+    
+    // Check if the script returned our expected success object
+    if(res && res.success !== undefined) {
+      toast(res.success?'✓ '+res.message:'✗ '+res.message,!res.success);
+    } else {
+      // In case we got an opaque response or unexpected format
+      toast('✓ Application submitted successfully!', false);
+    }
+  })
+  .catch(e => {
+    // Note: If you get a CORS error here, you might need to change mode to 'no-cors'
+    // in the fetch options above. However, 'no-cors' prevents reading the success message.
+    btn.disabled=false;
+    document.getElementById('btnTxt').textContent='Submit Application';
+    document.getElementById('spn').style.display='none';
+    
+    // In many GAS setups, CORS errors just mean the redirect failed, but the data was saved.
+    console.error(e);
+    toast('⚠ Submission may have failed. Please check the sheet or console.', true);
+  });
+}
+</script>
+</body>
+</html>
