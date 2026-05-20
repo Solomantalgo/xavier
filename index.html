@@ -772,7 +772,7 @@ select.f-in {
 // You MUST replace this with your actual Web App URL
 // after deploying the new Code.gs script in Apps Script.
 // ============================================================
-const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzNPxxB-0NCodzqt1wgr4Yip7WduwX9guCwnVQIhwOcvag6ngdQxKfCtqlYMolTe3jTw/exec';
+const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDE0kYJv7wCaGSIazBn4WtoQW0497v5o0ITAz3oykwVIjD3JlfSskfBgjMKkN_6_F82Q/exec';
 
 /* Auto-fill today's date */
 (function(){
@@ -915,6 +915,8 @@ function collect(){
     g2NIN     :isU?'':document.getElementById('nu2nin').value,
     g2IncomeSource:isU?'':document.getElementById('nu2src').value,
     g2Location:isU?'':document.getElementById('nu2loc').value,
+    agentName:document.getElementById('agName').value,
+    agentContact:document.getElementById('agCont').value,
   };
 }
 

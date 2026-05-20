@@ -57,7 +57,7 @@ function getHeaders() {
   return [
     'Timestamp', 'Form Type', 'Application Date', 'Union Branch',
     'Surname', 'Other Names', 'Village', 'Sub County', 'District',
-    'Date of Birth', 'NIN', 'TIN', 'Gender', 'Phone 1', 'Phone 2',
+    'Date of Birth', 'NIN', 'Gender', 'Phone 1', 'Phone 2',
     'Marital Status', 'Type of Residence',
     'Bike Applied For',
     'Exchange Bike Plate', 'Exchange Logbook Names', 'Exchange Bike Type',
@@ -71,11 +71,13 @@ function getHeaders() {
     'Total Daily Expense (UGX)',
     'Has Riding Permit',
     'Guarantor Type',
-    'G1 Name', 'G1 Contact', 'G1 NIN', 'G1 Guarantor ID',
+    'G1 Name', 'G1 Contact', 'G1 NIN',
     'G1 Union Loan ID', 'G1 Union Bike Plate',
     'G1 Income Source', 'G1 Location',
-    'G2 Name', 'G2 Contact', 'G2 NIN', 'G2 Guarantor ID',
-    'G2 Income Source', 'G2 Location'
+    'G2 Name', 'G2 Contact', 'G2 NIN',
+    'G2 Income Source', 'G2 Location',
+    'TIN', 'G1 Guarantor ID', 'G2 Guarantor ID',
+    'Agent Name', 'Agent Contact'
   ];
 }
 
@@ -85,7 +87,7 @@ function buildRow(d) {
     new Date(),
     d.formType || 'Union Bike Loan', d.applicationDate, d.unionBranch,
     d.surname, d.otherNames, d.village, d.subCounty, d.district,
-    d.dob, d.nin, d.tin || '', d.gender, d.phone1, d.phone2,
+    d.dob, d.nin, d.gender, d.phone1, d.phone2,
     d.maritalStatus, d.residence,
     d.bikeType || '',
     d.exchangePlate || '', d.exchangeLogbook || '', d.exchangeBikeType || '',
@@ -98,10 +100,15 @@ function buildRow(d) {
     d.totalExpense,
     d.ridingPermit,
     d.guarantorType || '',
-    d.g1Name, d.g1Contact, d.g1NIN, d.g1GuarantorID || '',
+    d.g1Name, d.g1Contact, d.g1NIN,
     d.g1LoanId || '', d.g1BikePlate || '',
     d.g1IncomeSource, d.g1Location,
-    d.g2Name, d.g2Contact, d.g2NIN, d.g2GuarantorID || '',
-    d.g2IncomeSource, d.g2Location
+    d.g2Name, d.g2Contact, d.g2NIN,
+    d.g2IncomeSource, d.g2Location,
+    d.tin || '',
+    d.g1GuarantorID || '',
+    d.g2GuarantorID || '',
+    d.agentName || '',
+    d.agentContact || ''
   ];
 }
