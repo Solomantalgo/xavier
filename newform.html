@@ -701,8 +701,8 @@ select.f-in {
       <div style="margin-top:14px;border-top:1px solid #aaa;padding-top:10px;">
         <div style="font-weight:700;font-size:13px;margin-bottom:8px;">UNION BRANCH MANAGER'S APPROVAL</div>
         <div class="f-row">
-          <div class="f-field" style="flex:1.8"><span class="f-lbl">Branch Manager's Name</span><div style="border-bottom:1.5px solid #000;height:24px;"></div></div>
-          <div class="f-field"><span class="f-lbl">Contact</span><div style="border-bottom:1.5px solid #000;height:24px;"></div></div>
+          <div class="f-field" style="flex:1.8"><span class="f-lbl">Branch Manager's Name</span><input class="f-in" type="text" id="bmName"/></div>
+          <div class="f-field"><span class="f-lbl">Contact</span><input class="f-in" type="tel" id="bmContact"/></div>
         </div>
         <div class="f-row" style="margin-bottom:0;">
           <div class="f-field"><span class="f-lbl">Signature</span>
@@ -757,7 +757,7 @@ select.f-in {
 // You MUST replace this with your actual Web App URL
 // after deploying the new Code.gs script in Apps Script.
 // ============================================================
-const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDE0kYJv7wCaGSIazBn4WtoQW0497v5o0ITAz3oykwVIjD3JlfSskfBgjMKkN_6_F82Q/exec';
+const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXbzWotM9xeTRBKiQBbPjD-hVnwF0UPXl4f6CegaXKmXt6XOjyOoYpSQogcIa2UkLvA/exec';
 
 /* Auto-fill today's date */
 (function(){
@@ -889,9 +889,37 @@ function collect(){
     g2IncomeSource:document.getElementById('nu2src').value,
     g2Location:document.getElementById('nu2loc').value,
     g2GuarantorID:document.getElementById('nu2id').value,
-    agentName:document.getElementById('agName').value,
-    agentContact:document.getElementById('agCont').value,
+    agentName:document.getElementById('agName') ? document.getElementById('agName').value : '',
+    agentContact:document.getElementById('agCont') ? document.getElementById('agCont').value : '',
+    bmName:document.getElementById('bmName') ? document.getElementById('bmName').value : '',
+    bmContact:document.getElementById('bmContact') ? document.getElementById('bmContact').value : '',
+    bmSigDate:document.getElementById('bmSigDate') ? document.getElementById('bmSigDate').value : '',
+    bmBranch:document.getElementById('bmBranch') ? document.getElementById('bmBranch').value : '',
   };
+}
+
+/* Clear form completely */
+function clearForm() {
+  var inputs = document.querySelectorAll('input:not([type=file]):not([type=button]):not([type=submit]), select');
+  inputs.forEach(function(el) {
+    if (el.type === 'radio' || el.type === 'checkbox') {
+      el.checked = false;
+    } else {
+      el.value = '';
+    }
+  });
+  document.querySelectorAll('.photo-box, .sig-box').forEach(function(box) {
+    box.classList.remove('loaded');
+    var img = box.querySelector('img');
+    if (img) {
+      img.src = '';
+      img.style.display = 'none';
+      img.removeAttribute('data-preview-url');
+    }
+  });
+  // refill date
+  var d=new Date(), y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  document.getElementById('appDate').value=y+'-'+m+'-'+dd;
 }
 
 /* Toast notification */
@@ -926,10 +954,14 @@ function doSubmit(){
     document.getElementById('spn').style.display='none';
     if(res && res.success !== undefined) {
       toast(res.success?'✓ '+res.message:'✗ '+res.message,!res.success);
-      if(res.success) localStorage.removeItem('bikeFormDraft_' + document.title);
+      if(res.success) {
+        localStorage.removeItem('bikeFormDraft_' + document.title);
+        clearForm();
+      }
     } else {
       toast('✓ Application submitted successfully!', false);
       localStorage.removeItem('bikeFormDraft_' + document.title);
+      clearForm();
     }
   })
   .catch(e => {

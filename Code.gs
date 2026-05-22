@@ -77,7 +77,8 @@ function getHeaders() {
     'G2 Name', 'G2 Contact', 'G2 NIN',
     'G2 Income Source', 'G2 Location',
     'TIN', 'G1 Guarantor ID', 'G2 Guarantor ID',
-    'Agent Name', 'Agent Contact'
+    'Agent Name', 'Agent Contact',
+    'Branch Manager Name', 'Branch Manager Contact', 'Manager Sig Date', 'Manager Branch'
   ];
 }
 
@@ -109,6 +110,10 @@ function buildRow(d) {
     d.g1GuarantorID || '',
     d.g2GuarantorID || '',
     d.agentName || '',
-    d.agentContact || ''
+    d.agentContact || '',
+    d.bmName || '',
+    d.bmContact || '',
+    d.bmSigDate || '',
+    d.bmBranch || ''
   ];
 }
