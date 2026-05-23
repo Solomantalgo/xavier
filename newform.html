@@ -912,6 +912,44 @@ function populateForm(data) {
     if(typeof switchG === 'function') switchG();
   }
   
+  if (data.photoUrl) {
+    var img = document.getElementById('photoImg');
+    if (img) {
+      img.src = data.photoUrl;
+      img.style.display = 'block';
+      var box = document.getElementById('photoBox');
+      if (box) box.classList.add('loaded');
+    }
+  }
+  if (data.sigUrl) {
+    var input = document.getElementById('appSigFile');
+    if (input) {
+      var box = input.closest('.sig-box');
+      if (box) {
+        var img = box.querySelector('img');
+        if (img) {
+          img.src = data.sigUrl;
+          img.style.display = 'block';
+          box.classList.add('loaded');
+        }
+      }
+    }
+  }
+  if (data.bmSigUrl) {
+    var input = document.getElementById('bmSigFile');
+    if (input) {
+      var box = input.closest('.sig-box');
+      if (box) {
+        var img = box.querySelector('img');
+        if (img) {
+          img.src = data.bmSigUrl;
+          img.style.display = 'block';
+          box.classList.add('loaded');
+        }
+      }
+    }
+  }
+
   document.getElementById('btnTxt').textContent = 'Update Application';
 }
 

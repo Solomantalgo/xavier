@@ -927,6 +927,44 @@ function populateForm(data) {
     if(typeof switchG === 'function') switchG();
   }
   
+  if (data.photoUrl) {
+    var img = document.getElementById('photoImg');
+    if (img) {
+      img.src = data.photoUrl;
+      img.style.display = 'block';
+      var box = document.getElementById('photoBox');
+      if (box) box.classList.add('loaded');
+    }
+  }
+  if (data.sigUrl) {
+    var input = document.getElementById('appSigFile');
+    if (input) {
+      var box = input.closest('.sig-box');
+      if (box) {
+        var img = box.querySelector('img');
+        if (img) {
+          img.src = data.sigUrl;
+          img.style.display = 'block';
+          box.classList.add('loaded');
+        }
+      }
+    }
+  }
+  if (data.bmSigUrl) {
+    var input = document.getElementById('bmSigFile');
+    if (input) {
+      var box = input.closest('.sig-box');
+      if (box) {
+        var img = box.querySelector('img');
+        if (img) {
+          img.src = data.bmSigUrl;
+          img.style.display = 'block';
+          box.classList.add('loaded');
+        }
+      }
+    }
+  }
+
   document.getElementById('btnTxt').textContent = 'Update Application';
 }
 
@@ -1145,6 +1183,11 @@ async function doSubmit(){
   btn.disabled=true;
   document.getElementById('btnTxt').textContent='Uploading & Submitting…';
   document.getElementById('spn').style.display='block';
+
+  // Collect images as Base64
+  d.photoBase64   = await toBase64(document.getElementById('photoFile'));
+  d.sigBase64     = await toBase64(document.getElementById('appSigFile'));
+  d.bmSigBase64   = await toBase64(document.getElementById('bmSigFile'));
 
   // But no-cors prevents reading the response JSON. 
   // Let's try standard fetch first.

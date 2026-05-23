@@ -122,7 +122,10 @@ function doGet(e) {
       g2Location: foundRow[47], tin: foundRow[48], g1GuarantorID: foundRow[49], g2GuarantorID: foundRow[50],
       agentName: foundRow[51], agentContact: foundRow[52], bmName: foundRow[53], bmContact: foundRow[54],
       bmSigDate: foundRow[55] instanceof Date ? formatDate(foundRow[55]) : foundRow[55], bmBranch: foundRow[56],
-      formId: foundRow[57]
+      formId: foundRow[57],
+      photoUrl: foundRow[58] || '',
+      sigUrl: foundRow[59] || '',
+      bmSigUrl: foundRow[60] || ''
     };
 
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: result }))
@@ -179,16 +182,34 @@ function doPost(e) {
 
     // --- Upload images to Google Drive ---
     var namePrefix = (data.surname || 'applicant').replace(/[^a-zA-Z0-9]/g, '_') + '_' + formId;
-    if (data.photoBase64 && !isUpdate) {
-      data.photoUrl = saveImageToDrive(data.photoBase64, namePrefix + '_photo');
-    } else if (data.photoBase64 && isUpdate) {
-      data.photoUrl = saveImageToDrive(data.photoBase64, namePrefix + '_photo');
+    
+    var existingPhotoUrl = '';
+    var existingSigUrl = '';
+    var existingBmSigUrl = '';
+    
+    if (isUpdate && rowToUpdate > 0) {
+      var existingRowValues = sheet.getRange(rowToUpdate, 1, 1, 61).getValues()[0];
+      existingPhotoUrl = existingRowValues[58] || '';
+      existingSigUrl = existingRowValues[59] || '';
+      existingBmSigUrl = existingRowValues[60] || '';
     }
+
+    if (data.photoBase64) {
+      data.photoUrl = saveImageToDrive(data.photoBase64, namePrefix + '_photo');
+    } else {
+      data.photoUrl = existingPhotoUrl;
+    }
+
     if (data.sigBase64) {
       data.sigUrl = saveImageToDrive(data.sigBase64, namePrefix + '_signature');
+    } else {
+      data.sigUrl = existingSigUrl;
     }
+
     if (data.bmSigBase64) {
       data.bmSigUrl = saveImageToDrive(data.bmSigBase64, namePrefix + '_manager_sig');
+    } else {
+      data.bmSigUrl = existingBmSigUrl;
     }
 
     var row = buildRow(data);
