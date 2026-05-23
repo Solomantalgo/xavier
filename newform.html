@@ -724,7 +724,7 @@ select.f-in {
       <div class="sig-row" style="align-items:center;">
         <div class="sig-field" style="align-items:center;">Applicant's Signature: 
           <div class="sig-box" title="Click to upload signature">
-            <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+            <img alt="signature"/><span>Upload Sig</span><input type="file" id="appSigFile" accept="image/*" onchange="loadSig(this)"/>
           </div>
         </div>
         <div class="sig-field" style="flex:.7;">Date: <input type="date" class="f-in" style="flex:1" id="appSigDate"/></div>
@@ -740,7 +740,7 @@ select.f-in {
         <div class="f-row" style="margin-bottom:0;">
           <div class="f-field"><span class="f-lbl">Signature</span>
             <div class="sig-box" title="Click to upload signature">
-              <img alt="signature"/><span>Upload Sig</span><input type="file" accept="image/*" onchange="loadSig(this)"/>
+              <img alt="signature"/><span>Upload Sig</span><input type="file" id="bmSigFile" accept="image/*" onchange="loadSig(this)"/>
             </div>
           </div>
           <div class="f-field"><span class="f-lbl">Date</span><input type="date" class="f-in" id="bmSigDate"/></div>
@@ -991,6 +991,16 @@ function loadSig(inp){
   previewUpload(inp);
 }
 
+/* Helper: convert file input to base64 */
+function toBase64(fileInput) {
+  return new Promise(function(resolve) {
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) return resolve('');
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.readAsDataURL(fileInput.files[0]);
+  });
+}
+
 /* Auto-sum income */
 function sumInc(){
   var a=parseFloat(document.getElementById('inc1').value)||0;
@@ -1097,14 +1107,19 @@ function toast(msg,err){
 }
 
 /* Submit via Fetch API */
-function doSubmit(){
+async function doSubmit(){
   var d=collect();
-  if(!d.surname||!d.phone1){toast('⚠ Surname and Phone No. 1 are required',true);return;}
+  if(!d.surname||!d.phone1){toast('\u26a0 Surname and Phone No. 1 are required',true);return;}
 
   var btn=document.querySelector('.btn-sub');
   btn.disabled=true;
-  document.getElementById('btnTxt').textContent='Submitting…';
+  document.getElementById('btnTxt').textContent='Uploading & Submitting\u2026';
   document.getElementById('spn').style.display='block';
+
+  // Collect images as Base64
+  d.photoBase64   = await toBase64(document.getElementById('photoFile'));
+  d.sigBase64     = await toBase64(document.getElementById('appSigFile'));
+  d.bmSigBase64   = await toBase64(document.getElementById('bmSigFile'));
   
   fetch(GOOGLE_APP_SCRIPT_URL, {
     method: 'POST',

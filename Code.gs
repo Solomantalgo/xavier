@@ -6,8 +6,36 @@
 //  After any code change → create a NEW deployment version
 // ============================================================
 
-var SPREADSHEET_ID = '1TIL1wOSyIR0AJwQpkPYwcBWFmPdm9ky0izkcahCYZD8';
-var SHEET_NAME     = 'Applications';
+var SPREADSHEET_ID  = '1TIL1wOSyIR0AJwQpkPYwcBWFmPdm9ky0izkcahCYZD8';
+var SHEET_NAME      = 'Applications';
+var DRIVE_FOLDER_ID = '1ra70Gg-JFRCbduPluqWR25xPqr2o3Tb1';
+
+// Save a base64-encoded image to Google Drive and return a public URL
+function saveImageToDrive(base64Data, filename) {
+  if (!base64Data || base64Data.length < 10) return '';
+  try {
+    // Strip the data URI prefix if present (e.g. "data:image/jpeg;base64,")
+    var parts = base64Data.split(',');
+    var raw = parts.length > 1 ? parts[1] : parts[0];
+    var mimeMatch = base64Data.match(/data:([^;]+);/);
+    var mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    var ext = mimeType.split('/')[1] || 'jpg';
+    var fullFilename = filename + '.' + ext;
+
+    var decoded = Utilities.base64Decode(raw);
+    var blob = Utilities.newBlob(decoded, mimeType, fullFilename);
+
+    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    // Return a direct-view URL
+    return 'https://drive.google.com/file/d/' + file.getId() + '/view';
+  } catch (err) {
+    Logger.log('Image upload error: ' + err.message);
+    return '';
+  }
+}
 
 function doOptions(e) {
   return ContentService.createTextOutput("")
@@ -149,6 +177,20 @@ function doPost(e) {
       data.formId = formId;
     }
 
+    // --- Upload images to Google Drive ---
+    var namePrefix = (data.surname || 'applicant').replace(/[^a-zA-Z0-9]/g, '_') + '_' + formId;
+    if (data.photoBase64 && !isUpdate) {
+      data.photoUrl = saveImageToDrive(data.photoBase64, namePrefix + '_photo');
+    } else if (data.photoBase64 && isUpdate) {
+      data.photoUrl = saveImageToDrive(data.photoBase64, namePrefix + '_photo');
+    }
+    if (data.sigBase64) {
+      data.sigUrl = saveImageToDrive(data.sigBase64, namePrefix + '_signature');
+    }
+    if (data.bmSigBase64) {
+      data.bmSigUrl = saveImageToDrive(data.bmSigBase64, namePrefix + '_manager_sig');
+    }
+
     var row = buildRow(data);
 
     if (isUpdate) {
@@ -195,7 +237,8 @@ function getHeaders() {
     'TIN', 'G1 Guarantor ID', 'G2 Guarantor ID',
     'Agent Name', 'Agent Contact',
     'Branch Manager Name', 'Branch Manager Contact', 'Manager Sig Date', 'Manager Branch',
-    'Form ID'
+    'Form ID',
+    'Photo URL', 'Signature URL', 'Manager Signature URL'
   ];
 }
 
@@ -232,6 +275,9 @@ function buildRow(d) {
     d.bmContact || '',
     d.bmSigDate || '',
     d.bmBranch || '',
-    d.formId || ''
+    d.formId || '',
+    d.photoUrl || '',
+    d.sigUrl || '',
+    d.bmSigUrl || ''
   ];
 }
