@@ -927,10 +927,21 @@ function populateForm(data) {
     if(typeof switchG === 'function') switchG();
   }
   
+  function getDirectImageUrl(url) {
+    if (!url) return '';
+    if (url.indexOf('drive.google.com') !== -1) {
+      var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return 'https://drive.google.com/uc?export=view&id=' + match[1];
+      }
+    }
+    return url;
+  }
+
   if (data.photoUrl) {
     var img = document.getElementById('photoImg');
     if (img) {
-      img.src = data.photoUrl;
+      img.src = getDirectImageUrl(data.photoUrl);
       img.style.display = 'block';
       var box = document.getElementById('photoBox');
       if (box) box.classList.add('loaded');
@@ -943,7 +954,7 @@ function populateForm(data) {
       if (box) {
         var img = box.querySelector('img');
         if (img) {
-          img.src = data.sigUrl;
+          img.src = getDirectImageUrl(data.sigUrl);
           img.style.display = 'block';
           box.classList.add('loaded');
         }
@@ -957,7 +968,7 @@ function populateForm(data) {
       if (box) {
         var img = box.querySelector('img');
         if (img) {
-          img.src = data.bmSigUrl;
+          img.src = getDirectImageUrl(data.bmSigUrl);
           img.style.display = 'block';
           box.classList.add('loaded');
         }
