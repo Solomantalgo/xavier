@@ -9,14 +9,109 @@
 var SPREADSHEET_ID = '1TIL1wOSyIR0AJwQpkPYwcBWFmPdm9ky0izkcahCYZD8';
 var SHEET_NAME     = 'Applications';
 
+function doOptions(e) {
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+function generateFormId() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var id = 'UB-';
+  for(var i=0; i<6; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
+function formatDate(date) {
+  var y = date.getFullYear();
+  var m = String(date.getMonth() + 1).padStart(2, '0');
+  var d = String(date.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+function doGet(e) {
+  try {
+    if (e.parameter.action !== 'getApp') {
+      return ContentService.createTextOutput("GET endpoint ready.").setMimeType(ContentService.MimeType.TEXT);
+    }
+
+    var formId = e.parameter.formId;
+    var nin = e.parameter.nin;
+    var dob = e.parameter.dob;
+
+    if (!formId && !(nin && dob)) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, message: 'Provide Form ID or NIN & DOB' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) throw new Error('Sheet not found');
+
+    var data = sheet.getDataRange().getValues();
+    var foundRow = null;
+
+    // Reverse loop to get the most recent submission if NIN/DOB matches multiple
+    for (var i = data.length - 1; i > 0; i--) {
+      var row = data[i];
+      if (formId) {
+        if (row[57] === formId) {
+          foundRow = row;
+          break;
+        }
+      } else if (nin && dob) {
+        var rowNin = String(row[10]).trim();
+        var rowDob = String(row[9]).trim();
+        if (row[9] instanceof Date) {
+          rowDob = formatDate(row[9]);
+        }
+        if (rowNin.toLowerCase() === String(nin).toLowerCase().trim() && rowDob === String(dob).trim()) {
+          foundRow = row;
+          break;
+        }
+      }
+    }
+
+    if (!foundRow) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, message: 'Application not found.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var result = {
+      formType: foundRow[1], applicationDate: foundRow[2] instanceof Date ? formatDate(foundRow[2]) : foundRow[2],
+      unionBranch: foundRow[3], surname: foundRow[4], otherNames: foundRow[5], village: foundRow[6],
+      subCounty: foundRow[7], district: foundRow[8], dob: foundRow[9] instanceof Date ? formatDate(foundRow[9]) : foundRow[9],
+      nin: foundRow[10], gender: foundRow[11], phone1: foundRow[12], phone2: foundRow[13], maritalStatus: foundRow[14],
+      residence: foundRow[15], bikeType: foundRow[16], exchangePlate: foundRow[17], exchangeLogbook: foundRow[18],
+      exchangeBikeType: foundRow[19], workName: foundRow[20], workLocation: foundRow[21], chairmanName: foundRow[22],
+      chairmanContact: foundRow[23], incomeSource1: foundRow[24], dailyIncome1: foundRow[25], incomeSource2: foundRow[26],
+      dailyIncome2: foundRow[27], totalIncome: foundRow[28], expense1: foundRow[29], dailyCost1: foundRow[30],
+      expense2: foundRow[31], dailyCost2: foundRow[32], totalExpense: foundRow[33], ridingPermit: foundRow[34],
+      guarantorType: foundRow[35], g1Name: foundRow[36], g1Contact: foundRow[37], g1NIN: foundRow[38],
+      g1LoanId: foundRow[39], g1BikePlate: foundRow[40], g1IncomeSource: foundRow[41], g1Location: foundRow[42],
+      g2Name: foundRow[43], g2Contact: foundRow[44], g2NIN: foundRow[45], g2IncomeSource: foundRow[46],
+      g2Location: foundRow[47], tin: foundRow[48], g1GuarantorID: foundRow[49], g2GuarantorID: foundRow[50],
+      agentName: foundRow[51], agentContact: foundRow[52], bmName: foundRow[53], bmContact: foundRow[54],
+      bmSigDate: foundRow[55] instanceof Date ? formatDate(foundRow[55]) : foundRow[55], bmBranch: foundRow[56],
+      formId: foundRow[57]
+    };
+
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: result }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 function doPost(e) {
   try {
     var data;
-    // Handle both raw JSON and form data (in case 'no-cors' is used or standard POST)
     if (e.postData && e.postData.contents) {
       data = JSON.parse(e.postData.contents);
     } else {
-      // Fallback
       data = JSON.parse(e.parameter.data);
     }
     
@@ -34,22 +129,43 @@ function doPost(e) {
       sheet.setFrozenRows(1);
     }
 
-    var row = buildRow(data);
-    sheet.appendRow(row);
+    var isUpdate = false;
+    var rowToUpdate = -1;
+    var formId = data.formId || '';
 
-    return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Application submitted successfully!' }))
-      .setMimeType(ContentService.MimeType.JSON);
+    if (formId) {
+       var dataRange = sheet.getDataRange().getValues();
+       for(var i = dataRange.length - 1; i > 0; i--) {
+         if (dataRange[i][57] === formId) {
+           rowToUpdate = i + 1;
+           isUpdate = true;
+           break;
+         }
+       }
+    }
+    
+    if (!isUpdate) {
+      formId = generateFormId();
+      data.formId = formId;
+    }
+
+    var row = buildRow(data);
+
+    if (isUpdate) {
+      // Overwrite existing row
+      sheet.getRange(rowToUpdate, 1, 1, row.length).setValues([row]);
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Application updated successfully!', formId: formId }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } else {
+      sheet.appendRow(row);
+      return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Application submitted successfully!', formId: formId }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
 
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, message: err.message }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-// To allow preflight requests for CORS (Google handles it somewhat weirdly, but this helps in some setups)
-function doOptions(e) {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 // ---------- Column headers ----------
@@ -78,7 +194,8 @@ function getHeaders() {
     'G2 Income Source', 'G2 Location',
     'TIN', 'G1 Guarantor ID', 'G2 Guarantor ID',
     'Agent Name', 'Agent Contact',
-    'Branch Manager Name', 'Branch Manager Contact', 'Manager Sig Date', 'Manager Branch'
+    'Branch Manager Name', 'Branch Manager Contact', 'Manager Sig Date', 'Manager Branch',
+    'Form ID'
   ];
 }
 
@@ -114,6 +231,7 @@ function buildRow(d) {
     d.bmName || '',
     d.bmContact || '',
     d.bmSigDate || '',
-    d.bmBranch || ''
+    d.bmBranch || '',
+    d.formId || ''
   ];
 }
