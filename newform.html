@@ -461,6 +461,7 @@ select.f-in {
   .submit-wrap { display: none !important; }
   #toast { display: none !important; }
   .section { page-break-inside: avoid; }
+  .attachments-section { page-break-before: always !important; }
   .f-in, .meta-input { border-bottom: 1px solid #000; }
   .f-in:focus { background: transparent; }
   .section-header { -webkit-print-color-adjust: exact; }
@@ -475,7 +476,7 @@ select.f-in {
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
     Edit Application
   </button>
-  <button class="btn-print" onclick="window.print()">
+  <button class="btn-print" onclick="syncAttachments(); window.print()">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
     </svg>
@@ -776,6 +777,18 @@ select.f-in {
     </button>
   </div>
 
+  <!-- ══ ATTACHED DOCUMENTS SECTION (FOR PRINT/PDF) ══ -->
+  <div class="section attachments-section" id="printAttachments" style="margin-top: 25px;">
+    <div class="section-header">
+      ATTACHED DOCUMENT COPIES <em>(Passport Photo, Signatures &amp; Uploaded Files)</em>
+    </div>
+    <div class="section-body" id="attachmentsContainer" style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; padding: 18px 14px; background: #fafafa;">
+      <div style="color: #999; font-size: 12px; text-align: center; padding: 30px; font-weight: 600; width: 100%;">
+        [No Uploaded Documents or Images Found]
+      </div>
+    </div>
+  </div>
+
   <div class="page-foot">
     <span>This Form Is Not For Sale</span>
     <span>1</span>
@@ -1014,6 +1027,95 @@ function loadLocal() {
 document.addEventListener('input', saveLocal);
 document.addEventListener('change', saveLocal);
 document.addEventListener('DOMContentLoaded', loadLocal);
+
+/* ── Sync Attachments Section for Print/PDF ──
+   Gathers all uploaded images and Drive URLs
+   and renders them in the print-only section. */
+function syncAttachments() {
+  var container = document.getElementById('attachmentsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  var items = [];
+
+  // Helper: add item from a loaded img element with a label
+  function addFromImg(imgEl, label) {
+    if (!imgEl) return;
+    var src = imgEl.src || '';
+    if (!src || src === window.location.href) return;
+    items.push({ src: src, label: label });
+  }
+
+  // 1. Passport photo
+  addFromImg(document.getElementById('photoImg'), 'Applicant Passport Photo');
+
+  // 2. LC1 Chairman letter
+  var lc1Img = document.getElementById('lc1Img');
+  if (lc1Img && lc1Img.src && lc1Img.src !== window.location.href) {
+    items.push({ src: lc1Img.src, label: 'LC1 Chairman Letter' });
+  }
+
+  // 3. Applicant signature
+  var appSigInput = document.getElementById('appSigFile');
+  if (appSigInput) {
+    var appSigBox = appSigInput.closest('.sig-box');
+    if (appSigBox) addFromImg(appSigBox.querySelector('img'), 'Applicant Signature');
+  }
+
+  // 4. Branch Manager signature
+  var bmSigInput = document.getElementById('bmSigFile');
+  if (bmSigInput) {
+    var bmSigBox = bmSigInput.closest('.sig-box');
+    if (bmSigBox) addFromImg(bmSigBox.querySelector('img'), 'Branch Manager Signature');
+  }
+
+  // 5. Guarantor IDs, LC1 letters, and signatures from upload boxes
+  var labelMap = {
+    'nu1id': 'Guarantor 1 ID',
+    'nu2id': 'Guarantor 2 ID'
+  };
+  document.querySelectorAll('.sig-box.loaded, .photo-box.loaded').forEach(function(box) {
+    var fileInput = box.querySelector('input[type=file]');
+    var imgEl = box.querySelector('img');
+    var skipIds = ['appSigFile', 'bmSigFile', 'photoFile', 'lc1File'];
+    if (fileInput && skipIds.indexOf(fileInput.id) !== -1) return;
+    var label = (fileInput && labelMap[fileInput.id]) || '';
+    if (!label) {
+      var lbl = box.closest('.f-field');
+      if (lbl) { var sp = lbl.querySelector('.f-lbl'); if (sp) label = sp.textContent.trim(); }
+    }
+    addFromImg(imgEl, label || 'Uploaded Document');
+  });
+
+  if (items.length === 0) {
+    container.innerHTML = '<div style="color:#999;font-size:12px;text-align:center;padding:30px;font-weight:600;width:100%;">[No Uploaded Documents or Images Found]</div>';
+    return;
+  }
+
+  items.forEach(function(item) {
+    var card = document.createElement('div');
+    card.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:7px;min-width:130px;max-width:180px;flex:1;';
+
+    var labelEl = document.createElement('div');
+    labelEl.style.cssText = 'font-size:11px;font-weight:700;color:#1a5c45;text-align:center;text-transform:uppercase;letter-spacing:0.5px;';
+    labelEl.textContent = item.label;
+
+    var imgWrap = document.createElement('div');
+    imgWrap.style.cssText = 'border:1.5px solid #ccc;border-radius:3px;overflow:hidden;width:100%;background:#fff;min-height:80px;display:flex;align-items:center;justify-content:center;';
+
+    var img = document.createElement('img');
+    img.src = item.src;
+    img.alt = item.label;
+    img.style.cssText = 'max-width:100%;max-height:160px;object-fit:contain;display:block;';
+    img.onerror = function() { imgWrap.style.display = 'none'; };
+
+    imgWrap.appendChild(img);
+    card.appendChild(labelEl);
+    card.appendChild(imgWrap);
+    container.appendChild(card);
+  });
+}
+
 
 function previewUpload(inp){
   if(!inp.files||!inp.files[0]) return;

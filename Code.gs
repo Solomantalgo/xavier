@@ -27,7 +27,13 @@ function saveImageToDrive(base64Data, filename) {
 
     var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
     var file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    // Nested try-catch: if sharing policies block setSharing, we still want to return the URL!
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (sharingErr) {
+      Logger.log('Warning setting sharing permissions: ' + sharingErr.message);
+    }
 
     // Return a direct-view URL
     return 'https://drive.google.com/file/d/' + file.getId() + '/view';
@@ -148,16 +154,30 @@ function doPost(e) {
     
     var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     var sheet = ss.getSheetByName(SHEET_NAME);
+    var headers = getHeaders();
 
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
-      var headers = getHeaders();
       sheet.appendRow(headers);
       sheet.getRange(1, 1, 1, headers.length)
            .setFontWeight('bold')
            .setBackground('#1a5c45')
            .setFontColor('#ffffff');
       sheet.setFrozenRows(1);
+    } else {
+      // Self-healing: Check if sheet needs columns and headers expanded
+      var currentHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+      if (currentHeaders.length < headers.length) {
+        var diff = headers.length - currentHeaders.length;
+        // Add new columns to the sheet grid
+        sheet.insertColumnsAfter(sheet.getMaxColumns(), diff);
+        // Overwrite the header row to include the new columns
+        sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+        sheet.getRange(1, 1, 1, headers.length)
+             .setFontWeight('bold')
+             .setBackground('#1a5c45')
+             .setFontColor('#ffffff');
+      }
     }
 
     var isUpdate = false;
@@ -188,7 +208,9 @@ function doPost(e) {
     var existingBmSigUrl = '';
     
     if (isUpdate && rowToUpdate > 0) {
-      var existingRowValues = sheet.getRange(rowToUpdate, 1, 1, 61).getValues()[0];
+      // Safeguard: Read only up to last column dynamically
+      var lastCol = sheet.getLastColumn();
+      var existingRowValues = sheet.getRange(rowToUpdate, 1, 1, lastCol).getValues()[0];
       existingPhotoUrl = existingRowValues[58] || '';
       existingSigUrl = existingRowValues[59] || '';
       existingBmSigUrl = existingRowValues[60] || '';
@@ -213,9 +235,19 @@ function doPost(e) {
     }
 
     var row = buildRow(data);
+    Logger.log("DEBUG - ROW DETAILS:");
+    Logger.log("Row Length: " + row.length);
+    Logger.log("Form ID (col 58): " + row[57]);
+    Logger.log("Photo URL (col 59): " + row[58]);
+    Logger.log("Sig URL (col 60): " + row[59]);
+    Logger.log("BM Sig URL (col 61): " + row[60]);
 
     if (isUpdate) {
-      // Overwrite existing row
+      // Ensure the sheet grid is large enough before writing the row
+      var maxCols = sheet.getMaxColumns();
+      if (maxCols < row.length) {
+        sheet.insertColumnsAfter(maxCols, row.length - maxCols);
+      }
       sheet.getRange(rowToUpdate, 1, 1, row.length).setValues([row]);
       return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Application updated successfully!', formId: formId }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -301,4 +333,29 @@ function buildRow(d) {
     d.sigUrl || '',
     d.bmSigUrl || ''
   ];
+}
+
+// ==========================================
+//  DEVELOPER DEBUGGING TOOLS
+// ==========================================
+
+// Run this to verify that the script has write access to the Drive folder
+function testImageSave() {
+  try {
+    // A 1x1 pixel transparent PNG in base64
+    var testData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    var url = saveImageToDrive(testData, 'test_image_' + new Date().getTime());
+    if (url) {
+      Logger.log('SUCCESS! Image saved at: ' + url);
+    } else {
+      Logger.log('FAILED: No URL returned (check if you have Editor permissions on the folder)');
+    }
+  } catch(e) {
+    Logger.log('FAILED: ' + e.message);
+  }
+}
+
+// Run this to see which Google account is executing this script
+function showMyEmail() {
+  Logger.log("Your Apps Script account is: " + Session.getActiveUser().getEmail());
 }
